@@ -1,70 +1,129 @@
-# Practical lesson pz-SOLID  
-# Практична реалізація SOLID принципів  
+\# Практична реалізація SOLID
 
-> У цьому занятті студенти отримують практичні навички застосування SOLID принципів під час рефакторингу існуючого коду.  
-> Мета — створити гнучку, масштабовану та чисту архітектуру шляхом застосування SRP, OCP, LSP, ISP та DIP.
 
----
 
-## What need to do:
-* Провести аналіз вихідного «анти-SOLID» коду  
-* Визначити порушення кожного SOLID принципу  
-* Виконати рефакторинг згідно з:
-  * SRP — Single Responsibility Principle  
-  * OCP — Open/Closed Principle  
-  * LSP — Liskov Substitution Principle  
-  * ISP — Interface Segregation Principle  
-  * DIP — Dependency Inversion Principle  
-* Створити відповідні інтерфейси й абстракції  
-* Усунути зайві або циклічні залежності  
-* Додати мінімальний набір unit-тестів після рефакторингу  
+Цей репозиторій містить приклад рефакторингу системи обробки замовлень, де вихідний "анти-патерн" код перетворюється на чисту архітектуру згідно з принципами \*\*SOLID\*\*.
+
+
 
 ---
 
-## Acceptance criteria
-* Реалізація на мові Typescript 
-* Студент розуміє кожен SOLID принцип та пояснює його застосування  
-* Увесь вихідний код проаналізовано  
-* Усі порушення SOLID знайдено та описано  
-* Після рефакторингу:
-  * Кожен клас має одну відповідальність (SRP)  
-  * Код розширюється через нові класи, а не редагування існуючих (OCP)  
-  * Класи-нащадки повністю заміщають базові (LSP)  
-  * Інтерфейси невеликі й специфічні (ISP)  
-  * Залежності реалізовані через абстракції (DIP)  
-* Код структурований, логічний та зрозумілий  
-* Усі тести проходять успішно  
-* Звіт оформлений у Markdown (README.md)
 
-## Directory Structure
-```
-├── pz-SOLID
-│   ├── src
-│   │   ├── original          # код із навмисними порушеннями SOLID
-│   │   ├── refactored        # код після рефакторингу
-│   │   ├── interfaces        # абстракції та інтерфейси
-│   ├── tests
-│   │   ├── refactored.spec.js
-│   ├── .editorconfig
-│   ├── .gitignore
-│   ├── jest.config.js
-│   ├── package.json
-│   ├── package-lock.json
-│   ├── README.md
-└──
-```
 
-## Useful links
+\## Технологічний стек
 
-[SOLID Principles Explained](https://www.baeldung.com/solid-principles)
+\* \*\*Мова:\*\* \[TypeScript](https://www.typescriptlang.org/)
 
-[SOLID: The First 5 Principles of Object-Oriented Design](https://www.freecodecamp.org/news/solid-principles-explained-in-plain-english/)
+\* \*\*Тестування:\*\* \[Jest](https://jestjs.io/)
 
-[JavaScript SOLID: Реалізація принципів](https://khalilstemmler.com/articles/solid-principles/)
+\* \*\*Середовище:\*\* Node.js
 
-[Clean Code Concepts Adapted for JavaScript](https://github.com/ryanmcdermott/clean-code-javascript)
 
-[Dependency Injection in JavaScript](https://javascript.plainenglish.io/dependency-injection-in-javascript-1b82a8101c1a)
+
+---
+
+
+
+\## Аналіз порушень (Original Code)
+
+
+
+У папці `src/original` знаходиться код, який ігнорує принципи проектування. Основні проблеми:
+
+
+
+| Принцип | Порушення у вихідному коді |
+
+| :--- | :--- |
+
+| \*\*SRP\*\* | Клас `OrderProcessor` одночасно рахує ціну, обробляє логіку платежів та надсилає SMS. |
+
+| \*\*OCP\*\* | Нові методи оплати додаються через зміну існуючого методу `processOrder` (через `if/else`). |
+
+| \*\*LSP\*\* | Відсутність абстракцій робить неможливим заміну компонентів без ризику зламати логіку. |
+
+| \*\*ISP\*\* | Залежність від великих методів, які змушують реалізовувати непотрібний функціонал (наприклад, обов'язкове SMS). |
+
+| \*\*DIP\*\* | Клас сам створює екземпляри логерів та платіжних систем, замість отримання їх через конструктор. |
+
+
+
+---
+
+
+
+\## Рефакторинг за принципами SOLID
+
+
+
+У папці `src/refactored` реалізовано наступні покращення:
+
+
+
+\### 1. Single Responsibility (SRP)
+
+Кожен клас має одну зону відповідальності. Логіка розрахунку суми, проведення оплати та сповіщення винесені в окремі сервіси.
+
+
+
+\### 2. Open/Closed (OCP)
+
+Ми впровадили інтерфейс `IPaymentProcessor`. Тепер, щоб додати \*\*CryptoPayment\*\*, достатньо створити новий клас без редагування основного коду `OrderManager`.
+
+
+
+\### 3. Liskov Substitution (LSP)
+
+Усі типи сповіщень (`EmailNotification`, `SMSNotification`) повністю взаємозамінні, оскільки вони суворо дотримуються контракту `INotificationProvider`.
+
+
+
+\### 4. Interface Segregation (ISP)
+
+Інтерфейси розділені на дрібні та специфічні. Наприклад, `IRepository` не змішується з логікою сповіщень.
+
+
+
+\### 5. Dependency Inversion (DIP)
+
+`OrderManager` залежить від абстракцій (інтерфейсів), а не від конкретних класів. Залежності передаються через конструктор (\*\*Dependency Injection\*\*).
+
+
+
+---
+
+
+
+\## Структура проекту
+
+
+
+```text
+
+├── src
+
+│   ├── original          # Код із навмисними порушеннями SOLID
+
+│   ├── refactored        # Код після рефакторингу (Clean Architecture)
+
+│   │   ├── OrderManager.ts
+
+│   │   ├── PaymentServices.ts
+
+│   │   └── NotificationServices.ts
+
+│   └── interfaces        # Абстракції та контракти
+
+├── tests
+
+│   └── refactored.spec.ts # Unit-тести (Jest)
+
+├── jest.config.js
+
+├── package.json
+
+└── tsconfig.json
+
 
 
 
